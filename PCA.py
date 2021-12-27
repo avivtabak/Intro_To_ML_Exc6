@@ -78,8 +78,8 @@ def PCA(X, k):
 selected_images, h, w = get_pictures_by_name('Gerhard Schroeder')
 X = np.asarray([x.flatten() for x in selected_images])
 (U,S)= PCA(X,10)
-#for i in range(10):
-#	plot_vector_as_image(U[i],h,w)
+for i in range(10):
+	plot_vector_as_image(U[i],h,w)
 
 
 #QUESTION 1.C
@@ -100,7 +100,6 @@ for k in ks:
 		axes[row, 1].imshow(transformed.reshape((h, w)), cmap=plt.cm.gray)
 
 	fig.suptitle('k={}'.format(k), fontsize=16)
-	plt.tight_layout()
 	plt.show()
 
 
