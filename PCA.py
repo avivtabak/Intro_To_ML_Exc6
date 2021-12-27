@@ -33,24 +33,15 @@ def load_data():
 	lfw_people = fetch_lfw_people(min_faces_per_person=70, resize=0.4,download_if_missing=True)
 	return lfw_people
 
-def reduce_dimension(x:np.ndarray,V:np.ndarray)->np.ndarray:
+def transform_data(x:np.ndarray,V:np.ndarray)->np.ndarray:
 	"""
 
 	:param x: vector in R^d (where d = h*w of the picture)
 	:param V: V=[v1,...,vk] where vi (column i^th of V) in R^k and v1,...,vk
 			is an orthonormal basis to the sapce of dim k that V span
-	:return: a = V^T * x
+	:return: x^\hat = VV^T*x
 	"""
-	return V.T @ x
-def enlarge_dimension(a:np.ndarray,V:np.ndarray)->np.ndarray:
-	"""
-
-	:param a: vector in R^k (where d = h*w of the picture)
-	:param V: V=[v1,...,vk] where vi (column i^th of V) in R^k and v1,...,vk
-			is an orthonormal basis to the sapce of dim k that V span
-	:return: x = V*a
-	"""
-	return V @ a
+	return V @V.T @x
 ######################################################################################
 """
 Other then the PCA function below the rest of the functions are yours to change.
@@ -93,17 +84,23 @@ X = np.asarray([x.flatten() for x in selected_images])
 
 #QUESTION 1.C
 ks = [1,5,10,30,50,100]
+random_indices = np.random.choice(X.shape[0], size=5, replace=False)
+random_pictures = X[random_indices, :]
 for k in ks:
 	(U, S) = PCA(X, k)
-	random_indices = np.random.choice(X.shape[0], size=5, replace=False)
-	random_pictures = X[random_indices, :]
 	random_pictures_transformed = random_pictures.copy()
-	fig, axs = plt.subplots(2, 5)
-	for i in range(5):
-		random_pictures_transformed[i] = enlarge_dimension(reduce_dimension(random_pictures_transformed[i],U.T),U)
-		axs[i, 0].imshow(random_pictures[i].reshape((h, w)), cmap=plt.cm.gray)
-		axs[i, 1].imshow(random_pictures_transformed[i].reshape((h, w)), cmap=plt.cm.gray)
-		#plt.title('title', size=12)
+	fig, axes  = plt.subplots(nrows=5, ncols=2,constrained_layout=True)
+	for row in range(len(axes)):
+		random_pictures_transformed[row] = transform_data(random_pictures_transformed[row],U.T)
+		original = random_pictures[row]
+		transformed = random_pictures_transformed[row]
+		l2_norm = np.linalg.norm(original-transformed)
+		axes[:,0][row].set_ylabel("l2 distance:%.2f"%l2_norm, fontsize=9)
+		axes[row, 0].imshow(original.reshape((h, w)), cmap=plt.cm.gray)
+		axes[row, 1].imshow(transformed.reshape((h, w)), cmap=plt.cm.gray)
+
+	fig.suptitle('k={}'.format(k), fontsize=16)
+	plt.tight_layout()
 	plt.show()
 
 
