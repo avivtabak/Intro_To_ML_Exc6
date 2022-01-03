@@ -26,8 +26,11 @@ def generate_data(n,lambadas,cs):
 
 def update_term_em(j,xi,lambadas_t,cs):
     K=len(lambadas_t)
-    a = cs[j]*poisson.pmf(xi,lambadas_t[j])
-    b = sum([cs[k]*poisson.pmf(xi,lambadas_t[k]) for k in range(K)])
+    temp = np.zeros(K)
+    for k in range(K):
+        temp[k] = poisson.pmf(xi,lambadas_t[k])
+    a = cs[j]*temp[j]
+    b = np.sum(np.multiply(cs,temp))
     return a/b
 
 def em(xs,lambadas,cs,T):
