@@ -36,10 +36,14 @@ def update_term_em(j,xi,lambadas_t,cs):
 def em(xs,lambadas,cs,T):
     lambadas_t_plus_one = np.copy(lambadas)
     lambadas_t = None
+    cs_t_plus_one = np.copy(cs)
+    cs_t = None
     n = len(xs)
     for t in range(T):
         lambadas_t = np.copy(lambadas_t_plus_one)
         lambadas_t_plus_one = np.zeros(lambadas_t.shape[0])
+        cs_t = np.copy(cs_t_plus_one)
+        cs_t_plus_one = np.zeros(cs_t.shape[0])
         for j in range(len(lambadas_t)):
             temp = np.zeros(n)
             for i in range(n):
@@ -47,7 +51,8 @@ def em(xs,lambadas,cs,T):
             a = np.sum(np.multiply(xs,temp))
             b = np.sum(temp)
             lambadas_t_plus_one[j] = a/b
-    return lambadas_t
+            cs_t_plus_one[j] = b/n
+    return (lambadas_t,cs_t)
 
 
 #Question a
@@ -68,12 +73,12 @@ bins = np.linspace(0, 30, 30)
 lambadas_hat = np.array([1, 2, 3])
 cs_hat = np.array([1 / 3, 1 / 3, 1 / 3])
 for t in ts:
-    lambdas_em = em(xs, lambadas_hat, cs_hat, t)
-    xs_estimate = generate_data(n,lambdas_em,cs_hat)
+    lambdas_em,cs_em = em(xs, lambadas_hat, cs_hat, t)
+    xs_estimate = generate_data(n,lambdas_em,cs_em)
     plt.hist(xs,bins,alpha=0.5,label="estimated",density=True)
     plt.hist(xs_estimate, bins, alpha=0.5,label="true",density=True)
     plt.legend(loc='best')
-    plt.title("t = {}".format(t))
+    plt.title("t = {}\n lambadas = {} \n cs ={}".format(t,lambdas_em,cs_em))
     plt.ylabel("density")
     plt.xlabel("x")
     plt.show()
